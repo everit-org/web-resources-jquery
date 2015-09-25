@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>org.everit.web.resources</groupId>
+  <artifactId>org.everit.web.resources.jquery</artifactId>
+  <version>1.11.3-20150925</version>
+  <packaging>bundle</packaging>
+  <name>Everit Webresources - JQuery</name>
+  <description>JQuery Everit WebResource bundle</description>
+  <url>http://everit.org</url>
+
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <jquery.version>1.11.3</jquery.version>
+    <downloadUrl>http://code.jquery.com</downloadUrl>
+    <destinationDir>${project.build.directory}/jquery-unpacked</destinationDir>
+    <jqueryDestinationDir>${destinationDir}/META-INF/resources/${project.groupId}/jquery/${jquery.version}</jqueryDestinationDir>
+    <projectpath>webresources-jquery</projectpath>
+  </properties>
+
+  <licenses>
+    <license>
+      <name>MIT License</name>
+      <url>https://github.com/jquery/jquery/blob/master/MIT-LICENSE.txt</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
+
+  <scm>
+    <connection>scm:git:git://github.com/everit-org/${projectpath}.git</connection>
+    <developerConnection>scm:git:https://github.com/everit-org/${projectpath}.git</developerConnection>
+    <url>https://github.com/everit-org/${projectpath}</url>
+  </scm>
+
+  <developers>
+    <developer>
+      <name>Everit Team</name>
+    </developer>
+  </developers>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>wagon-maven-plugin</artifactId>
+        <version>1.0</version>
+        <executions>
+          <execution>
+            <id>download-js</id>
+            <phase>process-resources</phase>
+            <goals>
+              <goal>download-single</goal>
+            </goals>
+            <configuration>
+              <url>${downloadUrl}</url>
+              <fromFile>jquery-${jquery.version}.js</fromFile>
+              <toFile>${jqueryDestinationDir}/jquery.js</toFile>
+            </configuration>
+          </execution>
+          <execution>
+            <id>download-min-js</id>
+            <phase>process-resources</phase>
+            <goals>
+              <goal>download-single</goal>
+            </goals>
+            <configuration>
+              <url>${downloadUrl}</url>
+              <fromFile>jquery-${jquery.version}.min.js</fromFile>
+              <toFile>${jqueryDestinationDir}/jquery.min.js</toFile>
+            </configuration>
+          </execution>
+          <execution>
+            <id>download-source-map</id>
+            <phase>process-resources</phase>
+            <goals>
+              <goal>download-single</goal>
+            </goals>
+            <configuration>
+              <url>${downloadUrl}</url>
+              <fromFile>jquery-${jquery.version}.min.map</fromFile>
+              <toFile>${jqueryDestinationDir}/jquery.min.map</toFile>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+            <!-- remove the versions from the map file -->
+      <plugin>
+        <groupId>com.google.code.maven-replacer-plugin</groupId>
+        <artifactId>replacer</artifactId>
+        <version>1.5.2</version>
+        <executions>
+          <execution>
+            <phase>prepare-package</phase>
+            <goals>
+              <goal>replace</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <file>${jqueryDestinationDir}/jquery.min.map</file>
+          <replacements>
+            <replacement>
+              <token>-${jquery.version}</token>
+              <value />
+            </replacement>
+          </replacements>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <version>2.6</version>
+        <executions>
+          <execution>
+            <id>empty-javadoc-jar</id>
+            <phase>package</phase>
+            <goals>
+              <goal>jar</goal>
+            </goals>
+            <configuration>
+              <classifier>javadoc</classifier>
+              <classesDirectory>${basedir}/src/main/resources</classesDirectory>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>maven-bundle-plugin</artifactId>
+        <extensions>true</extensions>
+        <configuration>
+          <instructions>
+            <Provide-Capability>
+              everit.webresource;name=jquery;libraryPrefix=jquery;version:Version=${jquery.version};resourceFolder=META-INF/resources/org.everit.web.resources/jquery/${jquery.version}
+            </Provide-Capability>
+            <Include-Resource>
+              {maven-resources}, {maven-dependencies}
+            </Include-Resource>
+          </instructions>
+        </configuration>
+      </plugin>
+    </plugins>
+    <extensions>
+      <extension>
+                <!-- this extension is required by wagon in order to pass the proxy -->
+                <!-- cf. http://jira.codehaus.org/browse/MNG-5237 -->
+        <groupId>org.apache.maven.wagon</groupId>
+        <artifactId>wagon-http-lightweight</artifactId>
+        <version>2.4</version>
+      </extension>
+    </extensions>
+    <resources>
+     <resource>
+       <directory>${destinationDir}</directory>
+     </resource>
+   </resources>
+  </build>
+
+</project>
